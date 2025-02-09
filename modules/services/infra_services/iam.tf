@@ -21,7 +21,7 @@ resource "aws_iam_policy" "ec2_policy" {
 
 resource "aws_iam_role" "ec2_role" {
   name = "${var.cloud_env}_ec2_role"
-  assume_role_policy = file("{$path.modules}/assumerolepolicy.json")
+  assume_role_policy = file("{$path.module}/assumerolepolicy.json")
 }
 resource "aws_iam_role_policy_attachment" "ec2_policy_role" {
   role       = aws_iam_role.ec2_role.name
