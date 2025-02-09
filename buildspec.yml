@@ -1,0 +1,45 @@
+version: 0.2
+
+env:
+  variables:
+    SDLC_ENV: "$1"  # Value can dev/qa/prod
+    TF_COMMAND: "$2" # Value can apply/destroy
+    TERRAFORM_VERSION: "1.10.5"
+  # Required if you want to retrieve custom environment variables stored in AWS Systems Manager Parameter Store.
+  # parameter-store:
+  #   TF_CLOUD_TOKEN: "TF_CLOUD_TOKEN"
+  # Required if you want to retrieve custom environment variables stored in AWS Secrets Manager. Specify a Secrets Manager reference-key using the following pattern:
+  # secrets-manager:
+  #   TF_CLOUD_TOKEN: "TF_CLOUD_Secret:MY_SECRET_VAR"
+    # <key>: <secret-id>:<json-key>:<version-stage>:<version-id>
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    on-failure: ABORT
+    commands:
+      - tf_version=$TERRAFORM_VERSION
+      - wget https://releases.hashicorp.com/terraform/"$TERRAFORM_VERSION"/terraform_"$TERRAFORM_VERSION"_linux_amd64.zip
+      - ls -ltr
+      - unzip -o terraform_"$TERRAFORM_VERSION"_linux_amd64.zip
+      - mv terraform /usr/local/bin/
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - echo terraform execution started on `date`
+  build:
+    on-failure: ABORT
+    commands:
+      - ls -lrt "$CODEBUILD_SRC_DIR/terraform-manifests"
+      - terraform --version
+      - cd "$CODEBUILD_SRC_DIR/terraform-manifests/$SDLC_ENV"
+      - terraform init
+      - terraform validate
+      - terraform plan
+      - terraform $TF_COMMAND -auto-approve
+      # - terraform $TF_COMMAND -input=false -var-file=dev.tfvars -auto-approve
+  post_build:
+    on-failure: CONTINUE
+    commands:
+      - echo terraform execution completed on `date`
