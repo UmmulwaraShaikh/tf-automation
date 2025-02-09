@@ -31,9 +31,9 @@ phases:
   build:
     on-failure: ABORT
     commands:
-      - ls -lrt "$CODEBUILD_SRC_DIR/tf-automation"
+      - ls -lrt "$CODEBUILD_SRC_DIR"
       - terraform --version
-      - cd "$CODEBUILD_SRC_DIR/tf-automation/$SDLC_ENV"
+      - cd "$CODEBUILD_SRC_DIR/$SDLC_ENV"
       - terraform init
       - terraform validate
       - terraform plan
